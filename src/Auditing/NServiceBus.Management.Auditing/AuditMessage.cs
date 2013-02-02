@@ -5,7 +5,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Raven.Json.Linq;
 
-namespace NServiceBus.Management.Auditing
+namespace NServiceBus.Management.Auditing.Core
 {
     public class AuditMessage
     {

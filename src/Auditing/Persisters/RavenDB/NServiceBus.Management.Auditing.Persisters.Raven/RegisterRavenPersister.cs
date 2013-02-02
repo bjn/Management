@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NServiceBus.Management.Auditing.Persisters.Raven;
+using NServiceBus.Config;
+using NServiceBus.Management.Auditing.Core;
 using Raven.Client.Document;
 
-namespace NServiceBus.Management.Auditing.Persister
+namespace NServiceBus.Management.Auditing.Persisters.Raven
 {
-    class RegisterRavenPersister : IWantCustomInitialization
+    class RegisterRavenPersister : INeedInitialization
     {
         public void Init()
         {

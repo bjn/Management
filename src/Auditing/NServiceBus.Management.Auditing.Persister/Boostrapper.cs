@@ -14,9 +14,14 @@ using System.IO;
 using Newtonsoft.Json;
 using Raven.Json.Linq;
 using Formatting = Newtonsoft.Json.Formatting;
+using NServiceBus.Management.Auditing.Core;
 
 namespace NServiceBus.Management.Auditing.Persister
 {
+    /// <summary>
+    /// Create an in-memory TransactionalTransport and point it to the AuditQ, and serialize any message
+    /// that is received in the Q to the persistent store
+    /// </summary>
     class Boostrapper : IWantToRunAtStartup
     {
         public IBus Bus { get; set; }
@@ -26,9 +31,6 @@ namespace NServiceBus.Management.Auditing.Persister
 
         public void Run()
         {
-            // Create an in-memory TransactionalTransport and point it to the AuditQ
-            // Serialize data into the database.
-
             string auditQueue = ConfigurationManager.AppSettings["AuditQueue"];
             string machineName = Environment.MachineName;
 
@@ -64,12 +66,6 @@ namespace NServiceBus.Management.Auditing.Persister
         {
             var message = e.Message;
 
-            // Get the xml content of the message in the audit Q that's being stored.
-            //var doc = new XmlDocument();
-            //doc.Load(new MemoryStream(message.Body));
-            //var messageBodyXml = doc.InnerXml;
-
-
             var messageBodyXml = System.Text.Encoding.UTF8.GetString(message.Body);
             RavenJObject jsonBody;
             
@@ -83,7 +79,7 @@ namespace NServiceBus.Management.Auditing.Persister
                 doc.Load(new MemoryStream(message.Body));
                 var firstMessageNode = doc.DocumentElement.ChildNodes.Cast<XmlNode>().First();
                 var convertedJson = JsonConvert.SerializeXmlNode(firstMessageNode, Formatting.Indented, true);
-                jsonBody = RavenJObject.Parse(convertedJson);
+                jsonBody = convertedJson != "null" ? RavenJObject.Parse(convertedJson) : null;
             }
 
             // Get the header list as a key value dictionary...
